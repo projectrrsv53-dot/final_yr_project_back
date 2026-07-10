@@ -56,9 +56,15 @@ async def _send_request(
 
     except httpx.RequestError:
 
+        # raise HTTPException(
+        #     status_code=503,
+        #     detail="AI Server is unavailable."
+        # )
+       
+
         raise HTTPException(
             status_code=503,
-            detail="AI Server is unavailable."
+            detail=str(e)
         )
 
     except Exception as e:
