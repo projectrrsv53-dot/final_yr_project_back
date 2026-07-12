@@ -27,8 +27,55 @@ TIMEOUT = httpx.Timeout(300.0)
 # COMMON REQUEST
 # ==========================================================
 
+# async def _send_request(
+#     endpoint: str,
+#     data=None,
+#     json=None,
+#     files=None
+# ):
+
+#     try:
+
+#         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+
+#             response = await client.post(
+#                 f"{AI_SERVER_URL}/{endpoint}",
+#                 data=data,
+#                 json=json,
+#                 files=files
+#             )
+
+#         if response.status_code != 200:
+
+#             raise HTTPException(
+#                 status_code=response.status_code,
+#                 detail=response.text
+#             )
+
+#         return response.json()
+
+#     except httpx.RequestError as e:
+
+#         # raise HTTPException(
+#         #     status_code=503,
+#         #     detail="AI Server is unavailable."
+#         # )
+       
+
+#         raise HTTPException(
+#             status_code=503,
+#             detail=str(e)
+#         )
+
+#     except Exception as e:
+
+#         raise HTTPException(
+#             status_code=500,
+#             detail=str(e)
+#         )
 async def _send_request(
     endpoint: str,
+    method: str = "POST",
     data=None,
     json=None,
     files=None
@@ -38,11 +85,12 @@ async def _send_request(
 
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
 
-            response = await client.post(
-                f"{AI_SERVER_URL}/{endpoint}",
+            response = await client.request(
+                method=method,
+                url=f"{AI_SERVER_URL}/{endpoint}",
                 data=data,
                 json=json,
-                files=files
+                files=files,
             )
 
         if response.status_code != 200:
@@ -54,13 +102,7 @@ async def _send_request(
 
         return response.json()
 
-    except httpx.RequestError:
-
-        # raise HTTPException(
-        #     status_code=503,
-        #     detail="AI Server is unavailable."
-        # )
-       
+    except httpx.RequestError as e:
 
         raise HTTPException(
             status_code=503,
@@ -73,7 +115,6 @@ async def _send_request(
             status_code=500,
             detail=str(e)
         )
-
 
 # ==========================================================
 # TEXT + AUDIO
