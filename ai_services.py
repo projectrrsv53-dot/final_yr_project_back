@@ -244,11 +244,11 @@ async def _get_request(endpoint: str):
 
         return response.json()
 
-    except httpx.RequestError:
+    except httpx.RequestError as e:
 
         raise HTTPException(
             status_code=503,
-            detail="AI Server is unavailable."
+            detail=str(e)
         )
 
     except Exception as e:
