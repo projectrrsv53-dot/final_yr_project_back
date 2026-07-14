@@ -56,20 +56,20 @@ async def analyse(data: AnalysisModel):
 #     return {
 #         "sessions": sessions
 #     }
-# @router.post("/save-mood")
-# async def save_mood(data: dict):
+@router.post("/save-mood")
+async def save_mood(data: dict):
 
-#     mood = {
-#         "patient_id": data.get("patient_id"),
-#         "mood": data.get("mood"),
-#         "timestamp": datetime.utcnow()
-#     }
+    mood = {
+        "patient_id": data.get("patient_id"),
+        "mood": data.get("mood"),
+        "timestamp": datetime.utcnow()
+    }
 
-#     await db.patient_moods.insert_one(mood)
+    await db.patient_moods.insert_one(mood)
 
-#     return {
-#         "message": "Mood saved successfully"
-#     }
+    return {
+        "message": "Mood saved successfully"
+    }
 
 
 

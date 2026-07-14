@@ -855,7 +855,64 @@ async def register_user(data: RegisterRequest):
             await db.patient_profiles.insert_one(
                 patient_profile
             )
+            # ====================================================
+            # CONNECT PREFERRED DOCTOR
+            # ====================================================
 
+            if data.preferred_doctor_id:
+
+                doctor = await db.users.find_one({
+
+                    "user_id": data.preferred_doctor_id,
+
+                    "role": "doctor",
+
+                    "is_active": True
+                })
+
+                if doctor:
+
+                    doctor_profile = await db.doctor_profiles.find_one({
+
+                        "user_id": data.preferred_doctor_id,
+
+                        "verification_status": "approved"
+                    })
+
+                    if doctor_profile:
+
+                        existing = await db.doctor_patient_access.find_one({
+
+                            "patient_id": user_id,
+
+                            "doctor_id": data.preferred_doctor_id
+                        })
+
+                        if not existing:
+
+                            connection = {
+
+                                "patient_id": user_id,
+
+                                "doctor_id": data.preferred_doctor_id,
+
+                                "active": True,
+
+                                "connected_at": datetime.utcnow()
+                            }
+
+                            await db.doctor_patient_access.insert_one(
+                                connection
+                            )
+
+                            await send_doctor_added_email(
+
+                                to_email=doctor["email"],
+
+                                doctor_name=doctor["name"],
+
+                                patient_name=data.name
+                            )
             # ====================================================
             # EMERGENCY CONTACTS
             # ====================================================
