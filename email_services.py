@@ -2,9 +2,6 @@ from dotenv import load_dotenv
 import os
 import resend
 
-<<<<<<< HEAD
-import smtplib
-=======
 load_dotenv()
 
 resend.api_key = os.getenv("RESEND_API_KEY")
@@ -16,7 +13,6 @@ resend.api_key = os.getenv("RESEND_API_KEY")
 # EMAIL_PASSWORD = os.getenv(
 #     "EMAIL_PASSWORD"
 # )
->>>>>>> 6b36707ce780bb5a95402f6ec41cf5efc522909a
 
 # import smtplib
 
@@ -133,7 +129,7 @@ async def send_email(
     subject: str,
     body: str
 ):
-<<<<<<< HEAD
+
     msg = MIMEMultipart()
 
     msg["From"] = EMAIL_ADDRESS
@@ -157,7 +153,6 @@ async def send_email(
     server.send_message(msg)
 
     server.quit()
-=======
     try:
         response = resend.Emails.send(
             {
@@ -173,7 +168,6 @@ async def send_email(
     except Exception as e:
         print("Resend Error:", e)
         raise
->>>>>>> 6b36707ce780bb5a95402f6ec41cf5efc522909a
 
 
 async def send_verification_email(
