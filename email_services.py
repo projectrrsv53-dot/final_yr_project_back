@@ -3,6 +3,7 @@ import os
 import resend
 
 load_dotenv()
+import smtplib
 
 resend.api_key = os.getenv("RESEND_API_KEY")
 
