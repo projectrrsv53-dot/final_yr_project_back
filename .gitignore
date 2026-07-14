@@ -10,3 +10,4 @@ outputs/
 uploads/
 
 .vscode/
+.env.*
