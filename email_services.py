@@ -1,53 +1,76 @@
 from dotenv import load_dotenv
 import os
+import resend
 
 load_dotenv()
 
-EMAIL_ADDRESS = os.getenv(
-    "EMAIL_ADDRESS"
-)
+resend.api_key = os.getenv("RESEND_API_KEY")
 
-EMAIL_PASSWORD = os.getenv(
-    "EMAIL_PASSWORD"
-)
+# EMAIL_ADDRESS = os.getenv(
+#     "EMAIL_ADDRESS"
+# )
 
-import smtplib
+# EMAIL_PASSWORD = os.getenv(
+#     "EMAIL_PASSWORD"
+# )
 
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+# import smtplib
+
+# from email.mime.text import MIMEText
+# from email.mime.multipart import MIMEMultipart
 
 
+# async def send_email(
+#         to_email: str,
+#         subject: str,
+#         body: str
+# ):
+
+#     msg = MIMEMultipart()
+
+#     msg["From"] = EMAIL_ADDRESS
+#     msg["To"] = to_email
+#     msg["Subject"] = subject
+
+#     msg.attach(
+#         MIMEText(body, "plain")
+#     )
+
+#     server = smtplib.SMTP(
+#         "smtp.gmail.com",
+#         587
+#     )
+
+#     server.starttls()
+
+#     server.login(
+#         EMAIL_ADDRESS,
+#         EMAIL_PASSWORD
+#     )
+
+#     server.send_message(msg)
+
+#     server.quit()
 async def send_email(
-        to_email: str,
-        subject: str,
-        body: str
+    to_email: str,
+    subject: str,
+    body: str
 ):
+    try:
+        response = resend.Emails.send(
+            {
+                "from": "MindSense <onboarding@resend.dev>",
+                "to": [to_email],
+                "subject": subject,
+                "text": body,
+            }
+        )
 
-    msg = MIMEMultipart()
+        print("Resend response:", response)
 
-    msg["From"] = EMAIL_ADDRESS
-    msg["To"] = to_email
-    msg["Subject"] = subject
-
-    msg.attach(
-        MIMEText(body, "plain")
-    )
-
-    server = smtplib.SMTP(
-        "smtp.gmail.com",
-        587
-    )
-
-    server.starttls()
-
-    server.login(
-        EMAIL_ADDRESS,
-        EMAIL_PASSWORD
-    )
-
-    server.send_message(msg)
-
-    server.quit()
+    except Exception as e:
+        print("Resend Error:", e)
+        raise
 
 
 async def send_verification_email(
