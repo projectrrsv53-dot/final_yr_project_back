@@ -9,5 +9,9 @@ outputs/
 
 uploads/
 
+<<<<<<< HEAD
 .vscode/
 .env.*
+=======
+.vscode/
+>>>>>>> 6b36707ce780bb5a95402f6ec41cf5efc522909a

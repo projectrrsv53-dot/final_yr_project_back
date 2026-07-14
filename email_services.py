@@ -1,10 +1,27 @@
 from dotenv import load_dotenv
 import os
+import resend
 
+<<<<<<< HEAD
 import smtplib
+=======
+load_dotenv()
 
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+resend.api_key = os.getenv("RESEND_API_KEY")
+
+# EMAIL_ADDRESS = os.getenv(
+#     "EMAIL_ADDRESS"
+# )
+
+# EMAIL_PASSWORD = os.getenv(
+#     "EMAIL_PASSWORD"
+# )
+>>>>>>> 6b36707ce780bb5a95402f6ec41cf5efc522909a
+
+# import smtplib
+
+# from email.mime.text import MIMEText
+# from email.mime.multipart import MIMEMultipart
 
 load_dotenv()
 
@@ -80,11 +97,43 @@ EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 SMTP_USERNAME = os.getenv("SMTP_USERNAME")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
+# async def send_email(
+#         to_email: str,
+#         subject: str,
+#         body: str
+# ):
+
+#     msg = MIMEMultipart()
+
+#     msg["From"] = EMAIL_ADDRESS
+#     msg["To"] = to_email
+#     msg["Subject"] = subject
+
+#     msg.attach(
+#         MIMEText(body, "plain")
+#     )
+
+#     server = smtplib.SMTP(
+#         "smtp.gmail.com",
+#         587
+#     )
+
+#     server.starttls()
+
+#     server.login(
+#         EMAIL_ADDRESS,
+#         EMAIL_PASSWORD
+#     )
+
+#     server.send_message(msg)
+
+#     server.quit()
 async def send_email(
     to_email: str,
     subject: str,
     body: str
 ):
+<<<<<<< HEAD
     msg = MIMEMultipart()
 
     msg["From"] = EMAIL_ADDRESS
@@ -108,6 +157,23 @@ async def send_email(
     server.send_message(msg)
 
     server.quit()
+=======
+    try:
+        response = resend.Emails.send(
+            {
+                "from": "MindSense <onboarding@resend.dev>",
+                "to": [to_email],
+                "subject": subject,
+                "text": body,
+            }
+        )
+
+        print("Resend response:", response)
+
+    except Exception as e:
+        print("Resend Error:", e)
+        raise
+>>>>>>> 6b36707ce780bb5a95402f6ec41cf5efc522909a
 
 
 async def send_verification_email(
