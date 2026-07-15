@@ -4,10 +4,17 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException
 from database import db
 from datetime import datetime, timedelta
-from email_services import (
-    send_appointment_confirmation_to_patient,
-    send_appointment_notification_to_doctor
-)
+# from email_services import (
+#     send_appointment_confirmation_to_patient,
+#     send_appointment_notification_to_doctor
+# )
+import httpx
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+AI_SERVER_URL = os.getenv("AI_SERVER_URL")
 
 router = APIRouter()
 
@@ -102,27 +109,51 @@ async def book(data: dict):
 
     if patient and patient.get("email"):
         try:
-            await send_appointment_confirmation_to_patient(
-                to_email=patient["email"],
-                patient_name=patient.get("name", "Patient"),
-                doctor_name=doctor.get("name", "Doctor") if doctor else "Doctor",
-                appointment_date=data["date"],
-                appointment_time=data["time"],
-                reason=data.get("reason", "Consultation")
+            # await send_appointment_confirmation_to_patient(
+            #     to_email=patient["email"],
+            #     patient_name=patient.get("name", "Patient"),
+            #     doctor_name=doctor.get("name", "Doctor") if doctor else "Doctor",
+            #     appointment_date=data["date"],
+            #     appointment_time=data["time"],
+            #     reason=data.get("reason", "Consultation")
+            # )
+            async with httpx.AsyncClient() as client:
+                await client.post(
+                f"{AI_SERVER_URL}/email/appointment-patient",
+                json={
+                    "to_email": patient["email"],
+                    "patient_name": patient.get("name", "Patient"),
+                    "doctor_name": doctor.get("name", "Doctor") if doctor else "Doctor",
+                    "appointment_date": appointment_date,
+                    "appointment_time": appointment_time,
+                    "reason": data.get("reason", "Consultation"),
+                },
             )
         except Exception as e:
             print(f"Error sending patient email: {e}")
 
     if doctor and doctor.get("email"):
         try:
-            await send_appointment_notification_to_doctor(
-                to_email=doctor["email"],
-                doctor_name=doctor.get("name", "Doctor"),
-                patient_name=patient.get("name", "Patient") if patient else "Patient",
-                appointment_date=data["date"],
-                appointment_time=data["time"],
-                reason=data.get("reason", "Consultation")
-            )
+            # await send_appointment_notification_to_doctor(
+            #     to_email=doctor["email"],
+            #     doctor_name=doctor.get("name", "Doctor"),
+            #     patient_name=patient.get("name", "Patient") if patient else "Patient",
+            #     appointment_date=data["date"],
+            #     appointment_time=data["time"],
+            #     reason=data.get("reason", "Consultation")
+            # )
+            async with httpx.AsyncClient() as client:
+                await client.post(
+                    f"{AI_SERVER_URL}/email/appointment-doctor",
+                    json={
+                        "to_email": doctor["email"],
+                        "doctor_name": doctor["name"],
+                        "patient_name": patient["name"],
+                        "appointment_date": appointment_date,
+                        "appointment_time": appointment_time,
+                        "reason": data.get("reason", "Consultation"),
+    },
+)
         except Exception as e:
             print(f"Error sending doctor email: {e}")
 

@@ -5,7 +5,10 @@ from datetime import datetime
 from database import db
 from fastapi import HTTPException
 from email_services import send_doctor_added_email
+import httpx
+import os
 
+AI_SERVER_URL = os.getenv("AI_SERVER_URL")
 
 router = APIRouter()
 
@@ -198,18 +201,33 @@ async def connect_doctor(data: dict):
         "user_id": patient_id
     })
 
-    await send_doctor_added_email(
-        to_email=doctor["email"],
-        doctor_name=doctor["name"],
-        patient_name=patient["name"]
-    )
+    # await send_doctor_added_email(
+    #     to_email=doctor["email"],
+    #     doctor_name=doctor["name"],
+    #     patient_name=patient["name"]
+    # )
+    try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{AI_SERVER_URL}/email/doctor-added",
+                    json={
+                        "to_email": doctor["email"],
+                        "doctor_name": doctor["name"],
+                        "patient_name": patient["name"],
+                    },
+                )
 
-    return {
-        "message": "Doctor connected successfully",
-        "connection_id": str(
-            result.inserted_id
-        )
-    }
+            response.raise_for_status()
+
+    except Exception as e:
+            print(f"Failed to send doctor notification: {e}")
+
+            return {
+                "message": "Doctor connected successfully",
+                "connection_id": str(
+                    result.inserted_id
+                )
+            }
 
 
 @router.get("/patient/my-doctors/{patient_id}")

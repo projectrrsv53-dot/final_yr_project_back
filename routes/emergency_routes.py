@@ -6,7 +6,10 @@ from database import db
 from email_services import (
     send_emergency_contact_email
 )
+import httpx
+import os
 
+AI_SERVER_URL = os.getenv("AI_SERVER_URL")
 router = APIRouter()
 
 
@@ -103,11 +106,20 @@ async def confirm_critical(
 
         try:
 
-            await send_emergency_contact_email(
-                to_email=contact["email"],
-                contact_name=contact["name"],
-                patient_name=patient_name,
-            )
+            # await send_emergency_contact_email(
+            #     to_email=contact["email"],
+            #     contact_name=contact["name"],
+            #     patient_name=patient_name,
+            # )
+            async with httpx.AsyncClient() as client:
+                await client.post(
+                    f"{AI_SERVER_URL}/email/emergency-contact",
+                    json={
+                        "to_email": contact["email"],
+                        "contact_name": contact["name"],
+                        "patient_name": patient_name,
+                    },
+                )
 
         except Exception as e:
 

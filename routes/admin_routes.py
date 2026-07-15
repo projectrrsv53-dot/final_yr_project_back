@@ -3,19 +3,23 @@ from fastapi import APIRouter
 from database import db
 from datetime import datetime
 from fastapi import Query
+import httpx
+import os
 
-from email_services import (
+AI_SERVER_URL = os.getenv("AI_SERVER_URL")
 
-    send_verification_email,
+# from email_services import (
 
-    send_rejection_email
-)
+#     send_verification_email,
+
+#     send_rejection_email
+# )
 
 router = APIRouter()
 
-# ============================================================
-# ADMIN VERIFY DOCTOR
-# ============================================================
+# # ============================================================
+# # ADMIN VERIFY DOCTOR
+# # ============================================================
 
 @router.patch("/admin/verify-doctor/{user_id}")
 async def verify_doctor(user_id: str):
@@ -93,12 +97,22 @@ async def verify_doctor(user_id: str):
     # SEND EMAIL
     # ========================================================
 
-    await send_verification_email(
+    # await send_verification_email(
 
-        user["email"],
+    #     user["email"],
 
-        user["name"]
-    )
+    #     user["name"]
+    # )
+   
+
+    async with httpx.AsyncClient() as client:
+        await client.post(
+            f"{AI_SERVER_URL}/email/doctor-approved",
+            json={
+                "to_email": user["email"],
+                "doctor_name": user["name"],
+            },
+        )
 
     return {
 
@@ -171,12 +185,20 @@ async def reject_doctor(user_id: str):
     # SEND EMAIL
     # ========================================================
 
-    await send_rejection_email(
+    # await send_rejection_email(
 
-        user["email"],
+    #     user["email"],
 
-        user["name"]
-    )
+    #     user["name"]
+    # )
+    async with httpx.AsyncClient() as client:
+        await client.post(
+            f"{AI_SERVER_URL}/email/doctor-rejected",
+            json={
+                "to_email": user["email"],
+                "doctor_name": user["name"],
+            },
+        )
 
     return {
 

@@ -8,9 +8,13 @@ from database import db
 from fastapi import HTTPException
 from datetime import datetime
 from bson import ObjectId
-from email_services import (
-    send_emergency_contact_email
-)
+# from email_services import (
+#     send_emergency_contact_email
+# )
+import httpx
+import os
+
+AI_SERVER_URL = os.getenv("AI_SERVER_URL")
 
 router = APIRouter()
 
@@ -550,44 +554,44 @@ async def get_patient_moods(patient_id: str):
         "patient_id": patient_id,
         "moods": moods
     }
-@router.put(
-    "/doctor/session/{session_id}/review"
-)
-async def mark_session_reviewed(
-    session_id: str,
-    data: dict
-):
+# @router.put(
+#     "/doctor/session/{session_id}/review"
+# )
+# async def mark_session_reviewed(
+#     session_id: str,
+#     data: dict
+# ):
 
-    doctor_id = data.get("doctor_id")
-    doctor_name = data.get("doctor_name")
+#     doctor_id = data.get("doctor_id")
+#     doctor_name = data.get("doctor_name")
 
-    result = await db.analysis_results.update_one(
-        {
-            "session_id": session_id
-        },
-        {
-            "$set": {
-                "doctor_reviewed": True,
-                "reviewed_by": doctor_id,
-                "reviewed_by_name": doctor_name,
-                "reviewed_at": datetime.utcnow()
-            }
-        }
-    )
+#     result = await db.analysis_results.update_one(
+#         {
+#             "session_id": session_id
+#         },
+#         {
+#             "$set": {
+#                 "doctor_reviewed": True,
+#                 "reviewed_by": doctor_id,
+#                 "reviewed_by_name": doctor_name,
+#                 "reviewed_at": datetime.utcnow()
+#             }
+#         }
+#     )
 
-    if result.modified_count == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="Session not found"
-        )
+#     if result.modified_count == 0:
+#         raise HTTPException(
+#             status_code=404,
+#             detail="Session not found"
+#         )
 
-    return {
-        "message": "Session marked as reviewed",
-        "session_id": session_id,
-        "doctor_reviewed": True,
-        "reviewed_by": doctor_id,
-        "reviewed_at": datetime.utcnow()
-    }
+#     return {
+#         "message": "Session marked as reviewed",
+#         "session_id": session_id,
+#         "doctor_reviewed": True,
+#         "reviewed_by": doctor_id,
+#         "reviewed_at": datetime.utcnow()
+#     }
 @router.put(
     "/doctor/session/{session_id}/review"
 )
@@ -789,16 +793,25 @@ async def confirm_critical(
         if not contact.get("email"):
             continue
 
-        await send_emergency_contact_email(
-            to_email=
-                contact["email"],
+        # await send_emergency_contact_email(
+        #     to_email=
+        #         contact["email"],
 
-            contact_name=
-                contact["name"],
+        #     contact_name=
+        #         contact["name"],
 
-            patient_name=
-                patient["name"]
-        )
+        #     patient_name=
+        #         patient["name"]
+        # )
+        async with httpx.AsyncClient() as client:
+            await client.post(
+        f"{AI_SERVER_URL}/email/emergency-contact",
+        json={
+            "to_email": contact["email"],
+            "contact_name": contact["name"],
+            "patient_name": patient["name"],
+        },
+    )
 
     await db.analysis_results.update_one(
         {
